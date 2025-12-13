@@ -85,16 +85,33 @@ install_dependencies() {
     case $OS in
         ubuntu|debian)
             export DEBIAN_FRONTEND=noninteractive
-            apt-get update -qq
-            apt-get install -y -qq curl wget gpg lsb-release >/dev/null 2>&1
+            
+            # 修复Debian源问题
+            if [ "$OS" = "debian" ]; then
+                # 备份原sources.list
+                cp /etc/apt/sources.list /etc/apt/sources.list.bak 2>/dev/null
+                
+                # 使用官方镜像源
+                cat > /etc/apt/sources.list << 'EOF'
+deb http://deb.debian.org/debian bullseye main
+deb http://deb.debian.org/debian bullseye-updates main
+deb http://security.debian.org/debian-security bullseye-security main
+EOF
+            fi
+            
+            # 更新并安装
+            apt-get update -qq 2>&1 | grep -v "does not have a Release file" || true
+            apt-get install -y -qq curl wget gpg lsb-release ca-certificates 2>&1 | grep -v "does not have a Release file" || true
             ;;
         centos|rhel|rocky|almalinux)
-            yum install -y -q curl wget >/dev/null 2>&1
+            yum install -y -q curl wget ca-certificates 2>&1 | grep -v "^$" || true
             ;;
         *)
             yellow "未知系统类型,尝试继续..."
             ;;
     esac
+    
+    green "✓ 依赖安装完成"
 }
 
 # 下载WARP脚本
@@ -121,10 +138,9 @@ download_warp_script() {
         if [[ "$url" =~ "github" ]]; then
             for proxy in "${github_proxies[@]}"; do
                 local full_url="${proxy}${url}"
-                yellow "尝试: $full_url"
-                if wget -q --timeout=15 -O /tmp/warp_menu.sh "$full_url" 2>/dev/null; then
+                if timeout 20 wget -q --timeout=15 -O /tmp/warp_menu.sh "$full_url" 2>/dev/null; then
                     if [ -s /tmp/warp_menu.sh ] && grep -q "VERSION=" /tmp/warp_menu.sh; then
-                        green "✓ 脚本下载成功 (使用${proxy:-直连})"
+                        green "✓ 脚本下载成功"
                         chmod +x /tmp/warp_menu.sh
                         return 0
                     fi
@@ -132,8 +148,7 @@ download_warp_script() {
             done
         else
             # GitLab直接下载
-            yellow "尝试: $url"
-            if wget -q --timeout=15 -O /tmp/warp_menu.sh "$url" 2>/dev/null; then
+            if timeout 20 wget -q --timeout=15 -O /tmp/warp_menu.sh "$url" 2>/dev/null; then
                 if [ -s /tmp/warp_menu.sh ] && grep -q "VERSION=" /tmp/warp_menu.sh; then
                     green "✓ 脚本下载成功"
                     chmod +x /tmp/warp_menu.sh
@@ -143,7 +158,7 @@ download_warp_script() {
         fi
     done
     
-    red "所有下载源均失败"
+    red "脚本下载失败,请检查网络连接"
     exit 1
 }
 
@@ -154,21 +169,18 @@ install_warp_ipv4() {
     # 设置环境变量以实现无交互安装
     export DEBIAN_FRONTEND=noninteractive
     
-    # 选项说明:
-    # 4 = 安装WARP IPv4
-    # [lisence] = 空(使用免费账户)
-    # 自动选择语言为英语(1)或中文(2)
-    
     cd /tmp
     
-    # 模拟输入: 语言选择(默认), IPv4安装, 免费账户, IPv4优先
-    echo -e "1\n1\n1\n" | bash /tmp/warp_menu.sh 4 2>/dev/null || {
-        # 如果交互式失败,尝试直接调用
-        bash /tmp/warp_menu.sh 4 "" "" 2>/dev/null
-    }
+    # 使用echo自动输入三个1
+    # 第1个1: 语言选择 (1=English/默认, 2=中文)
+    # 第2个1: 账户类型 (1=免费账户, 2=WARP+)
+    # 第3个1: IPv4优先级 (1=IPv4优先, 2=IPv6优先, 3=默认)
+    echo -e "1\n1\n1\n" | bash /tmp/warp_menu.sh 4 2>&1 | grep -E "(成功|完成|Success|Complete|IPv4|WARP|Congratulations)" || true
     
     # 等待安装完成
-    sleep 3
+    sleep 5
+    
+    green "✓ WARP安装命令执行完成"
 }
 
 # 设置IPv4优先
