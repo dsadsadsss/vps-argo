@@ -12,9 +12,6 @@ PLAIN='\033[0m'
 echo -e "${CYAN}=======VPS 一键脚本(Tunnel Version)============${PLAIN}"
 echo "                      "
 echo "                      "
-#!/usr/bin/env bash
-# WARP IPv4 自动安装脚本
-# 功能: 检测IPv4支持情况,自动安装WARP并配置IPv4优先
 
 # 颜色输出函数
 red() { echo -e "\033[31m\033[01m$*\033[0m"; }
