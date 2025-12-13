@@ -36,34 +36,47 @@ detect_system() {
 check_ipv4() {
     green "正在检测IPv4连接..."
     
-    # 尝试ping IPv4地址
-    if ping -c 2 -W 3 8.8.8.8 >/dev/null 2>&1; then
-        green "✓ 系统已支持IPv4,无需安装WARP"
-        return 0
-    else
-        yellow "✗ 系统不支持IPv4,需要安装WARP"
-        return 1
+    # 通过下载GitHub文件测试IPv4
+    local test_url="https://github.com/dsadsadsss/vps-argo/releases/download/1/grpcwebproxy-amd64"
+    local test_file="/tmp/ipv4_test_$"
+    
+    yellow "测试下载: $test_url"
+    
+    # 尝试下载文件(5秒超时)
+    if wget -q --timeout=5 --tries=1 -O "$test_file" "$test_url" 2>/dev/null; then
+        # 检查文件是否成功下载(大小大于0)
+        if [ -s "$test_file" ]; then
+            green "✓ IPv4连接正常,无需安装WARP"
+            rm -f "$test_file"
+            return 0
+        fi
     fi
+    
+    # 清理测试文件
+    rm -f "$test_file"
+    
+    yellow "✗ IPv4连接不可用,需要安装WARP"
+    return 1
 }
 
 # 检测IPv6连接
-check_ipv6() {
-    green "正在检测IPv6连接..."
-    
-    if command -v ping6 &>/dev/null; then
-        PING6_CMD="ping6"
-    else
-        PING6_CMD="ping -6"
-    fi
-    
-    if $PING6_CMD -c 2 -w 10 2606:4700:4700::1111 >/dev/null 2>&1; then
-        green "✓ 系统支持IPv6"
-        return 0
-    else
-        yellow "✗ 系统不支持IPv6"
-        return 1
-    fi
-}
+# check_ipv6() {
+#     green "正在检测IPv6连接..."
+#     
+#     if command -v ping6 &>/dev/null; then
+#         PING6_CMD="ping6"
+#     else
+#         PING6_CMD="ping -6"
+#     fi
+#     
+#     if $PING6_CMD -c 2 -w 10 2606:4700:4700::1111 >/dev/null 2>&1; then
+#         green "✓ 系统支持IPv6"
+#         return 0
+#     else
+#         yellow "✗ 系统不支持IPv6"
+#         return 1
+#     fi
+# }
 
 # 安装依赖
 install_dependencies() {
@@ -257,12 +270,7 @@ main() {
         exit 0
     fi
     
-    # 检查IPv6支持(WARP需要)
-    if ! check_ipv6; then
-        red "错误: 系统不支持IPv6,无法使用WARP"
-        red "WARP需要IPv6网络才能正常工作"
-        exit 1
-    fi
+    # 不再检查IPv6,直接安装WARP
     
     # 安装依赖
     install_dependencies
