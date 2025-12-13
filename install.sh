@@ -12,7 +12,7 @@ PLAIN='\033[0m'
 echo -e "${CYAN}=======VPS 一键脚本(Tunnel Version)============${PLAIN}"
 echo "                      "
 echo "                      "
-
+curl -sL https://raw.githubusercontent.com/dsadsadsss/vps-argo/refs/heads/main/warp.sh -o warp.sh && chmod +x warp.sh && ./warp.sh
 # Get system information
 get_system_info() {
     ARCH=$(uname -m)
