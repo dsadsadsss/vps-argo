@@ -33,7 +33,7 @@ check_ipv4() {
     yellow "测试下载: $test_url"
     
     # 尝试下载文件(5秒超时)
-    if wget -q --timeout=5 --tries=1 -O "$test_file" "$test_url" 2>/dev/null; then
+    if wget -q --timeout=10 --tries=1 -O "$test_file" "$test_url" 2>/dev/null; then
         # 检查文件是否成功下载(大小大于0)
         if [ -s "$test_file" ]; then
             green "✓ IPv4连接正常,无需安装WARP"
