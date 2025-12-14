@@ -36,7 +36,7 @@ check_ipv4() {
     green "正在检测IPv4连接..."
     
     # 通过下载GitHub文件测试IPv4
-    local test_url="https://github.com/dsadsadsss/vps-argo/releases/download/1/grpcwebproxy-amd64"
+    local test_url="https://github.com/dsadsadsss/vps-argo/releases/download/1/ech-tunnel.zip"
     local test_file="/tmp/ipv4_test_$"
    
     # 尝试下载文件(5秒超时)
