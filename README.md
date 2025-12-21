@@ -21,6 +21,10 @@ curl -sL https://raw.githubusercontent.com/dsadsadsss/vps-argo/main/install.sh -
 ```
 wget -O install.sh https://raw.githubusercontent.com/dsadsadsss/vps-argo/main/install.sh && chmod +x install.sh && ./install.sh
 ```
+纯ipv6的vps使用反代脚本：
+```
+bash -c "$(curl -sL https://ghproxy.lvedong.eu.org/https://raw.githubusercontent.com/dsadsadsss/vps-argo/main/install.sh)"
+```
 ========================================
 
 下面为自用版本：
@@ -35,6 +39,10 @@ curl -sL https://raw.githubusercontent.com/dsadsadsss/vps-argo/main/install2.sh 
 ```
 ```
 wget -O install2.sh https://raw.githubusercontent.com/dsadsadsss/vps-argo/main/install2.sh && chmod +x install2.sh && ./install2.sh
+```
+纯ipv6的vps使用反代脚本：
+```
+bash -c "$(curl -sL https://ghproxy.lvedong.eu.org/https://raw.githubusercontent.com/dsadsadsss/vps-argo/main/install2.sh)"
 ```
 ========================================
 
